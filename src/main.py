@@ -36,7 +36,7 @@ BRICK_GAP = 1
 NUM_ROWS = 5
 NUM_COLS = 10
 
-COUNTDOWN_TIME = 5  # en secondes
+COUNTDOWN_TIME = 3  # en secondes
 
 LIVES = 5
 
@@ -94,7 +94,6 @@ def draw_lives(lives):
 
 
 def game():
-    global mouse_x
     clock = pygame.time.Clock()
     paddle_x = (SCREEN_WIDTH - PADDLE_WIDTH) // 2
     ball_x, ball_y = GAME_WIDTH // 2, SCREEN_HEIGHT // 2
