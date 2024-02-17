@@ -1,12 +1,14 @@
-import pygame
-import sys
 import random
-import math
+import sys
+
+import pygame
 
 pygame.init()
 
+
 def random_color():
-    return (random.randint(100, 245), random.randint(100, 245), random.randint(100, 245))
+    return random.randint(100, 245), random.randint(100, 245), random.randint(100, 245)
+
 
 SCREEN_WIDTH = 960
 SCREEN_HEIGHT = 600
@@ -30,7 +32,7 @@ PADDLE_SPEED = 20
 
 BRICK_WIDTH = 80
 BRICK_HEIGHT = 30
-BRICK_GAP = 1  
+BRICK_GAP = 1
 NUM_ROWS = 5
 NUM_COLS = 10
 
@@ -47,22 +49,26 @@ font_small = pygame.font.Font(None, 36)
 brick_break = pygame.mixer.Sound("../ressources/sounds/bottle_break.wav")
 brick_break.set_volume(0.1)
 
-mouse=True
+mouse = True
+
 
 def draw_paddle(paddle_x):
     pygame.draw.rect(screen, PADDLE_COLOR, (paddle_x, SCREEN_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT))
 
+
 def draw_ball(ball_x, ball_y):
     pygame.draw.circle(screen, BALL_COLOR, (ball_x, ball_y), BALL_RADIUS)
+
 
 def draw_bricks(bricks):
     for brick in bricks:
         pygame.draw.rect(screen, brick[1], brick[0])
 
+
 def create_bricks():
     bricks = []
     for row in range(NUM_ROWS):
-        colors = [random_color() for _ in range(NUM_COLS)]  
+        colors = [random_color() for _ in range(NUM_COLS)]
         for col, color in enumerate(colors):
             brick_x = col * (BRICK_WIDTH + BRICK_GAP)
             brick_y = row * (BRICK_HEIGHT + BRICK_GAP)
@@ -70,21 +76,25 @@ def create_bricks():
             bricks.append((brick_rect, color))
     return bricks
 
+
 def draw_countdown(count):
     text = font_large.render(str(count), True, WHITE)
     text_rect = text.get_rect(center=(GAME_WIDTH + 80, SCREEN_HEIGHT // 2))
-    pygame.draw.rect(screen, (0,0,0), text_rect)
+    pygame.draw.rect(screen, (0, 0, 0), text_rect)
     screen.blit(text, text_rect)
     pygame.display.flip()
 
+
 def draw_lives(lives):
-    pygame.draw.rect(screen, PADDLE_COLOR, (GAME_WIDTH+10, 0, 2, SCREEN_HEIGHT))
+    pygame.draw.rect(screen, PADDLE_COLOR, (GAME_WIDTH + 10, 0, 2, SCREEN_HEIGHT))
     x = GAME_WIDTH + 50
     for _ in range(lives):
         pygame.draw.circle(screen, WHITE, (x, 10), BALL_RADIUS * 0.67)
         x += BALL_RADIUS + 10
 
+
 def game():
+    global mouse_x
     clock = pygame.time.Clock()
     paddle_x = (SCREEN_WIDTH - PADDLE_WIDTH) // 2
     ball_x, ball_y = GAME_WIDTH // 2, SCREEN_HEIGHT // 2
@@ -105,7 +115,8 @@ def game():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     quit_game()
-        
+
+        mouse_x, _ = pygame.mouse.get_pos()
         if not mouse:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT] and paddle_x > 0:
@@ -113,15 +124,13 @@ def game():
             elif keys[pygame.K_RIGHT] and paddle_x < GAME_WIDTH - PADDLE_WIDTH:
                 paddle_x += PADDLE_SPEED
         else:
-            mouse_x, _ = pygame.mouse.get_pos()
             if mouse_x > paddle_x + PADDLE_WIDTH + PADDLE_SPEED + 1:
                 paddle_x += PADDLE_SPEED
             elif mouse_x < paddle_x - PADDLE_SPEED - 1:
                 paddle_x -= PADDLE_SPEED
-        paddle_x = min(paddle_x,GAME_WIDTH-PADDLE_WIDTH + 10)
-        if paddle_x < PADDLE_WIDTH // 4 and mouse_x < paddle_x:
-            paddle_x=0
-
+        paddle_x = min(paddle_x, GAME_WIDTH - PADDLE_WIDTH + 10)
+        if PADDLE_WIDTH // 4 > paddle_x > mouse_x:
+            paddle_x = 0
 
         ball_x += ball_dx
         ball_y += ball_dy
@@ -131,7 +140,7 @@ def game():
         if ball_y <= BALL_RADIUS:
             ball_dy *= -1
 
-        if ball_y + BALL_RADIUS >= SCREEN_HEIGHT - PADDLE_HEIGHT-1 and ball_x >= paddle_x and ball_x <= paddle_x + PADDLE_WIDTH:
+        if ball_y + BALL_RADIUS >= SCREEN_HEIGHT - PADDLE_HEIGHT - 1 and ball_x >= paddle_x and ball_x <= paddle_x + PADDLE_WIDTH:
             ball_dy *= -1
 
         if ball_x >= GAME_WIDTH - BALL_RADIUS:
@@ -143,7 +152,8 @@ def game():
             ball_dx, ball_dy = BALL_SPEED
 
         for brick in bricks:
-            if brick[0].colliderect(pygame.Rect(ball_x - BALL_RADIUS, ball_y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)):
+            if brick[0].colliderect(
+                    pygame.Rect(ball_x - BALL_RADIUS, ball_y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)):
                 bricks.remove(brick)
                 brick_break.play()
                 ball_dy *= -1
@@ -156,11 +166,11 @@ def game():
         # refresh
         pygame.display.flip()
         clock.tick(60)
-        
+
         while countdown > 0:
             draw_countdown(countdown)
             pygame.time.delay(1000)
-            countdown -= 1 
+            countdown -= 1
 
         if lives == 0 or not bricks:
             game_over = True
@@ -173,12 +183,14 @@ def game():
         game_over_text = font_large.render("Game Over", True, RED)
         screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
     pygame.display.flip()
-    pygame.time.delay(2000)  
+    pygame.time.delay(2000)
     quit_game()
+
 
 def quit_game():
     pygame.quit()
     sys.exit()
+
 
 def options():
     while True:
@@ -224,9 +236,10 @@ def main_menu():
             ball_dx *= -1
         if ball_y > SCREEN_HEIGHT or ball_y < 0:
             ball_dy *= -1
-        
+
         for button in buttons:
-            if button[0].colliderect(pygame.Rect(ball_x - BALL_RADIUS, ball_y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)):
+            if button[0].colliderect(
+                    pygame.Rect(ball_x - BALL_RADIUS, ball_y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)):
                 button = (button[0], random_color())
                 dx = ball_x - (button[0].x + button[0].width // 2)
                 dy = ball_y - (button[0].y + button[0].height // 2)
@@ -236,7 +249,7 @@ def main_menu():
                         ball_x = button[0].right + BALL_RADIUS
                     else:
                         ball_x = button[0].left - BALL_RADIUS
-                    ball_dx *= -1  
+                    ball_dx *= -1
                 else:
                     if dy > 0:
                         ball_y = button[0].bottom + BALL_RADIUS
@@ -244,10 +257,13 @@ def main_menu():
                         ball_y = button[0].top - BALL_RADIUS
                         ball_dy *= -1
             pygame.draw.rect(screen, button[1], button[0])
-        
-        screen.blit(text_play, text_play.get_rect(center=(button_left + button_width // 2, button_top + button_height // 2)))
-        screen.blit(text_options, text_options.get_rect(center=(button_left + button_width // 2, button_top + 100 + button_height // 2)))
-        screen.blit(text_exit, text_exit.get_rect(center=(button_left + button_width // 2, button_top + 200 + button_height // 2)))
+
+        screen.blit(text_play,
+                    text_play.get_rect(center=(button_left + button_width // 2, button_top + button_height // 2)))
+        screen.blit(text_options, text_options.get_rect(
+            center=(button_left + button_width // 2, button_top + 100 + button_height // 2)))
+        screen.blit(text_exit,
+                    text_exit.get_rect(center=(button_left + button_width // 2, button_top + 200 + button_height // 2)))
         draw_ball(int(ball_x), int(ball_y))
 
         for event in pygame.event.get():
@@ -270,6 +286,6 @@ def main_menu():
         pygame.display.update()
         clock.tick(60)
 
+
 if __name__ == "__main__":
     main_menu()
-
