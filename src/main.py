@@ -5,6 +5,9 @@ import math
 
 pygame.init()
 
+def random_color():
+    return (random.randint(100, 245), random.randint(100, 245), random.randint(100, 245))
+
 SCREEN_WIDTH = 960
 SCREEN_HEIGHT = 600
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -21,7 +24,7 @@ BALL_SPEED = [5, 5]
 
 PADDLE_WIDTH = 100
 PADDLE_HEIGHT = 20
-PADDLE_COLOR = GREEN
+PADDLE_COLOR = random_color()
 PADDLE_SPEED = 20
 
 BRICK_WIDTH = 80
@@ -42,6 +45,8 @@ font_small = pygame.font.Font(None, 36)
 
 brick_break = pygame.mixer.Sound("../ressources/sounds/bottle_break.wav")
 brick_break.set_volume(0.1)
+
+mouse=True
 
 def draw_paddle(paddle_x):
     pygame.draw.rect(screen, PADDLE_COLOR, (paddle_x, SCREEN_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT))
@@ -64,9 +69,6 @@ def create_bricks():
             bricks.append((brick_rect, color))
     return bricks
 
-def random_color():
-    return (random.randint(100, 245), random.randint(100, 245), random.randint(100, 245))
-
 def draw_countdown(count):
     text = font_large.render(str(count), True, WHITE)
     text_rect = text.get_rect(center=(GAME_WIDTH + 80, SCREEN_HEIGHT // 2))
@@ -75,7 +77,7 @@ def draw_countdown(count):
     pygame.display.flip()
 
 def draw_lives(lives):
-    pygame.draw.rect(screen, GREEN, (GAME_WIDTH+10, 0, 2, SCREEN_HEIGHT))
+    pygame.draw.rect(screen, PADDLE_COLOR, (GAME_WIDTH+10, 0, 2, SCREEN_HEIGHT))
     x = GAME_WIDTH + 50
     for _ in range(lives):
         pygame.draw.circle(screen, WHITE, (x, 10), BALL_RADIUS * 0.67)
@@ -102,15 +104,23 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     quit_game()
-            elif event.type == pygame.MOUSEMOTION:
-                mouse_x, _ = pygame.mouse.get_pos()
-                paddle_x = min(mouse_x,GAME_WIDTH-PADDLE_WIDTH + 10)
+        
+        if not mouse:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT] and paddle_x > 0:
+                paddle_x -= PADDLE_SPEED
+            elif keys[pygame.K_RIGHT] and paddle_x < GAME_WIDTH - PADDLE_WIDTH:
+                paddle_x += PADDLE_SPEED
+        else:
+            mouse_x, _ = pygame.mouse.get_pos()
+            if mouse_x > paddle_x + PADDLE_WIDTH + PADDLE_SPEED + 1:
+                paddle_x += PADDLE_SPEED
+            elif mouse_x < paddle_x - PADDLE_SPEED - 1:
+                paddle_x -= PADDLE_SPEED
+        paddle_x = min(paddle_x,GAME_WIDTH-PADDLE_WIDTH + 10)
+        if paddle_x < PADDLE_WIDTH // 4 and mouse_x < paddle_x:
+            paddle_x=0
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and paddle_x > 0:
-            paddle_x -= PADDLE_SPEED
-        if keys[pygame.K_RIGHT] and paddle_x < GAME_WIDTH - PADDLE_WIDTH:
-            paddle_x += PADDLE_SPEED
 
         ball_x += ball_dx
         ball_y += ball_dy
