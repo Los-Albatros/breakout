@@ -17,6 +17,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
 
 BALL_RADIUS = 10
 BALL_COLOR = WHITE
@@ -83,7 +84,7 @@ def draw_lives(lives):
         pygame.draw.circle(screen, WHITE, (x, 10), BALL_RADIUS * 0.67)
         x += BALL_RADIUS + 10
 
-def main():
+def game():
     clock = pygame.time.Clock()
     paddle_x = (SCREEN_WIDTH - PADDLE_WIDTH) // 2
     ball_x, ball_y = GAME_WIDTH // 2, SCREEN_HEIGHT // 2
@@ -96,7 +97,7 @@ def main():
     game_over = False
 
     while not game_over:
-        screen.fill((0, 0, 0))
+        screen.fill(BLACK)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -164,7 +165,7 @@ def main():
         if lives == 0 or not bricks:
             game_over = True
 
-    screen.fill((0, 0, 0))
+    screen.fill(BLACK)
     if not bricks:
         game_over_text = font_large.render("Game Win", True, GREEN)
         screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
@@ -179,6 +180,96 @@ def quit_game():
     pygame.quit()
     sys.exit()
 
+def options():
+    while True:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit_game()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    quit_game()
+                    game()
+                if event.key == pygame.K_m:
+                    main_menu()
+        pygame.display.update()
+
+
+def main_menu():
+    clock = pygame.time.Clock()
+    ball_x, ball_y = 10, 10
+    ball_dx, ball_dy = BALL_SPEED
+    buttons = []
+    button_width = 200
+    button_height = 50
+    button_left = SCREEN_WIDTH // 2 - button_width // 2
+    button_top = 200
+    button_play = pygame.Rect(button_left, button_top, button_width, button_height)
+    button_options = pygame.Rect(button_left, button_top + 100, button_width, button_height)
+    button_exit = pygame.Rect(button_left, button_top + 200, button_width, button_height)
+    buttons.append((button_play, (0, 0, 155)))
+    buttons.append((button_options, (0, 155, 0)))
+    buttons.append((button_exit, (155, 0, 0)))
+
+    while True:
+        screen.fill(BLACK)
+        text_play = font_small.render("Play", True, (255, 255, 255))
+        text_options = font_small.render("Options", True, (255, 255, 255))
+        text_exit = font_small.render("Exit", True, (255, 255, 255))
+        mx, my = pygame.mouse.get_pos()
+        ball_x += ball_dx
+        ball_y += ball_dy
+
+        if ball_x > SCREEN_WIDTH or ball_x < 0:
+            ball_dx *= -1
+        if ball_y > SCREEN_HEIGHT or ball_y < 0:
+            ball_dy *= -1
+        
+        for button in buttons:
+            if button[0].colliderect(pygame.Rect(ball_x - BALL_RADIUS, ball_y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)):
+                button = (button[0], random_color())
+                dx = ball_x - (button[0].x + button[0].width // 2)
+                dy = ball_y - (button[0].y + button[0].height // 2)
+
+                if abs(dx) > abs(dy):
+                    if dx > 0:
+                        ball_x = button[0].right + BALL_RADIUS
+                    else:
+                        ball_x = button[0].left - BALL_RADIUS
+                    ball_dx *= -1  
+                else:
+                    if dy > 0:
+                        ball_y = button[0].bottom + BALL_RADIUS
+                    else:
+                        ball_y = button[0].top - BALL_RADIUS
+                        ball_dy *= -1
+            pygame.draw.rect(screen, button[1], button[0])
+        
+        screen.blit(text_play, text_play.get_rect(center=(button_left + button_width // 2, button_top + button_height // 2)))
+        screen.blit(text_options, text_options.get_rect(center=(button_left + button_width // 2, button_top + 100 + button_height // 2)))
+        screen.blit(text_exit, text_exit.get_rect(center=(button_left + button_width // 2, button_top + 200 + button_height // 2)))
+        draw_ball(int(ball_x), int(ball_y))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit_game()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if button_play.collidepoint(mx, my):
+                    game()
+                if button_options.collidepoint(mx, my):
+                    options()
+                if button_exit.collidepoint(mx, my):
+                    quit_game()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    quit_game()
+                if event.key == pygame.K_g:
+                    game()
+                if event.key == pygame.K_o:
+                    options()
+        pygame.display.update()
+        clock.tick(60)
+
 if __name__ == "__main__":
-    main()
+    main_menu()
 
