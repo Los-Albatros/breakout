@@ -152,8 +152,11 @@ def game():
             ball_x = random.randint(10, GAME_WIDTH - 10)
             ball_y = SCREEN_HEIGHT // 2
             ball_dx, ball_dy = BALL_SPEED
-            ball_dx *=  random.choice([-1, 1])
-            countdown = COUNTDOWN_TIME
+            ball_dx *= random.choice([-1, 1])
+            if lives == 0 or not bricks:
+                game_over = True
+            else:
+                countdown = COUNTDOWN_TIME
 
         for brick in bricks:
             if brick[0].colliderect(
@@ -176,9 +179,6 @@ def game():
             pygame.time.delay(1000)
             countdown -= 1
 
-        if lives == 0 or not bricks:
-            game_over = True
-
     screen.fill(BLACK)
     if not bricks:
         game_over_text = font_large.render("Game Win", True, GREEN)
@@ -188,7 +188,7 @@ def game():
         screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
     pygame.display.flip()
     pygame.time.delay(2000)
-    quit_game()
+    main_menu()
 
 
 def quit_game():
