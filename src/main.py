@@ -151,8 +151,8 @@ def game():
             lives -= 1
             ball_x = random.randint(10, GAME_WIDTH - 10)
             ball_y = SCREEN_HEIGHT // 2
-            ball_dx = BALL_SPEED
-            ball_dy = BALL_SPEED
+            ball_dx, ball_dy = BALL_SPEED
+            ball_dx *=  random.choice([-1, 1])
             countdown = COUNTDOWN_TIME
 
         for brick in bricks:
