@@ -36,7 +36,7 @@ BRICK_GAP = 1
 NUM_ROWS = 5
 NUM_COLS = 10
 
-COUNTDOWN_TIME = 3  # en secondes
+COUNTDOWN_TIME = 3  # seconds
 
 LIVES = 5
 
@@ -113,7 +113,7 @@ def game():
                 quit_game()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    quit_game()
+                    main_menu()
 
         mouse_x, _ = pygame.mouse.get_pos()
         if not mouse:
@@ -127,9 +127,11 @@ def game():
                 paddle_x += PADDLE_SPEED
             elif mouse_x < paddle_x - PADDLE_SPEED - 1:
                 paddle_x -= PADDLE_SPEED
-        paddle_x = min(paddle_x, GAME_WIDTH - PADDLE_WIDTH + 10)
-        if PADDLE_WIDTH // 4 > paddle_x > mouse_x:
-            paddle_x = 0
+            paddle_x = min(paddle_x, GAME_WIDTH - PADDLE_WIDTH + 10)
+            if PADDLE_WIDTH // 4 > paddle_x > mouse_x:
+                paddle_x = 0
+            if GAME_WIDTH - PADDLE_WIDTH // 4 < paddle_x < mouse_x:
+                paddle_x = GAME_WIDTH - PADDLE_WIDTH
 
         ball_x += ball_dx
         ball_y += ball_dy
@@ -139,7 +141,7 @@ def game():
         if ball_y <= BALL_RADIUS:
             ball_dy *= -1
 
-        if ball_y + BALL_RADIUS >= SCREEN_HEIGHT - PADDLE_HEIGHT - 1 and ball_x >= paddle_x and ball_x <= paddle_x + PADDLE_WIDTH:
+        if ball_y + BALL_RADIUS >= SCREEN_HEIGHT - PADDLE_HEIGHT - 1 and paddle_x <= ball_x <= paddle_x + PADDLE_WIDTH:
             ball_dy *= -1
 
         if ball_x >= GAME_WIDTH - BALL_RADIUS:
@@ -208,7 +210,8 @@ def options():
 
 def main_menu():
     clock = pygame.time.Clock()
-    ball_x, ball_y = 10, 10
+    ball_x = random.randint(10, GAME_WIDTH - 10)
+    ball_y = random.randint(10, 100)
     ball_dx, ball_dy = BALL_SPEED
     buttons = []
     button_width = 200
