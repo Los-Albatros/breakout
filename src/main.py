@@ -46,7 +46,7 @@ pygame.display.set_caption("Breakout")
 font_large = pygame.font.Font(None, 70)
 font_small = pygame.font.Font(None, 36)
 
-brick_break = pygame.mixer.Sound("../ressources/sounds/bottle_break.wav")
+brick_break = pygame.mixer.Sound("../resources/sounds/bottle_break.wav")
 brick_break.set_volume(0.1)
 
 mouse = True
