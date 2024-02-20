@@ -140,11 +140,11 @@ def game():
                 paddle.x += PADDLE_SPEED
             elif mouse_x < paddle.x - PADDLE_SPEED - 1:
                 paddle.x -= PADDLE_SPEED
-            paddle_x = min(paddle.x, GAME_WIDTH - PADDLE_WIDTH + 10)
-            if PADDLE_WIDTH // 4 > paddle_x > mouse_x:
-                paddle_x = 0
-            if GAME_WIDTH - PADDLE_WIDTH // 4 < paddle_x < mouse_x:
-                paddle_x = GAME_WIDTH - PADDLE_WIDTH
+            paddle.x = min(paddle.x, GAME_WIDTH - PADDLE_WIDTH + 10)
+            if PADDLE_WIDTH // 4 > paddle.x > mouse_x:
+                paddle.x = 0
+            if GAME_WIDTH - PADDLE_WIDTH // 4 < paddle.x < mouse_x:
+                paddle.x = GAME_WIDTH - PADDLE_WIDTH
 
         ball_x += ball_dx
         ball_y += ball_dy
@@ -209,7 +209,7 @@ def quit_game():
 
 def options():
     while True:
-
+        screen.fill(BLACK)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game()
