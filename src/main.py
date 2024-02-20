@@ -52,8 +52,8 @@ brick_break.set_volume(0.1)
 mouse = True
 
 
-def draw_paddle(paddle_x):
-    pygame.draw.rect(screen, PADDLE_COLOR, (paddle_x, SCREEN_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT))
+def draw_paddle(paddle):
+    pygame.draw.rect(screen, PADDLE_COLOR, paddle)
 
 
 def draw_ball(ball_x, ball_y):
@@ -108,7 +108,7 @@ def bounce(shape, ball_x, ball_y, ball_dx, ball_dy):
 
 def game():
     clock = pygame.time.Clock()
-    paddle_x = (SCREEN_WIDTH - PADDLE_WIDTH) // 2
+    paddle = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH) // 2, SCREEN_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT)
     ball_x, ball_y = GAME_WIDTH // 2, SCREEN_HEIGHT // 2
     ball_dx, ball_dy = BALL_SPEED
 
@@ -131,16 +131,16 @@ def game():
         mouse_x, _ = pygame.mouse.get_pos()
         if not mouse:
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT] and paddle_x > 0:
-                paddle_x -= PADDLE_SPEED
-            elif keys[pygame.K_RIGHT] and paddle_x < GAME_WIDTH - PADDLE_WIDTH:
-                paddle_x += PADDLE_SPEED
+            if keys[pygame.K_LEFT] and paddle.x > 0:
+                paddle.x -= PADDLE_SPEED
+            elif keys[pygame.K_RIGHT] and paddle.x < GAME_WIDTH - PADDLE_WIDTH:
+                paddle.x += PADDLE_SPEED
         else:
-            if mouse_x > paddle_x + PADDLE_WIDTH + PADDLE_SPEED + 1:
-                paddle_x += PADDLE_SPEED
-            elif mouse_x < paddle_x - PADDLE_SPEED - 1:
-                paddle_x -= PADDLE_SPEED
-            paddle_x = min(paddle_x, GAME_WIDTH - PADDLE_WIDTH + 10)
+            if mouse_x > paddle.x + PADDLE_WIDTH + PADDLE_SPEED + 1:
+                paddle.x += PADDLE_SPEED
+            elif mouse_x < paddle.x - PADDLE_SPEED - 1:
+                paddle.x -= PADDLE_SPEED
+            paddle_x = min(paddle.x, GAME_WIDTH - PADDLE_WIDTH + 10)
             if PADDLE_WIDTH // 4 > paddle_x > mouse_x:
                 paddle_x = 0
             if GAME_WIDTH - PADDLE_WIDTH // 4 < paddle_x < mouse_x:
@@ -154,8 +154,7 @@ def game():
         if ball_y <= BALL_RADIUS:
             ball_dy *= -1
 
-        if ball_y + BALL_RADIUS >= SCREEN_HEIGHT - PADDLE_HEIGHT - 1 and paddle_x <= ball_x <= paddle_x + PADDLE_WIDTH:
-            ball_dy *= -1
+        is_bounce, ball_dx, ball_dy = bounce(paddle, ball_x, ball_y, ball_dx, ball_dy)
 
         if ball_x >= GAME_WIDTH - BALL_RADIUS:
             ball_dx *= -1
@@ -177,7 +176,7 @@ def game():
                 bricks.remove(brick)
                 brick_break.play()
 
-        draw_paddle(paddle_x)
+        draw_paddle(paddle)
         draw_ball(int(ball_x), int(ball_y))
         draw_bricks(bricks)
         draw_lives(lives)
