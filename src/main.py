@@ -93,6 +93,19 @@ def draw_lives(lives):
         x += BALL_RADIUS + 10
 
 
+def bounce(shape, ball_x, ball_y, ball_dx, ball_dy):
+    if shape.colliderect(pygame.Rect(ball_x - BALL_RADIUS, ball_y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)):
+        ball_dy *= -1
+        collision_point_y = ball_y - ball_dy
+        collision_point_x = ball_x - ball_dx
+        if ball_dy > 0 and collision_point_y <= shape.top or ball_dy < 0 and collision_point_y >= shape.bottom:
+            ball_dy *= -1
+        if ball_dx > 0 and collision_point_x <= shape.left or ball_dx < 0 and collision_point_x >= shape.right:
+            ball_dx *= -1
+        return True, ball_dx, ball_dy
+    return False, ball_dx, ball_dy
+
+
 def game():
     clock = pygame.time.Clock()
     paddle_x = (SCREEN_WIDTH - PADDLE_WIDTH) // 2
@@ -159,11 +172,10 @@ def game():
                 countdown = COUNTDOWN_TIME
 
         for brick in bricks:
-            if brick[0].colliderect(
-                    pygame.Rect(ball_x - BALL_RADIUS, ball_y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)):
+            is_bounce, ball_dx, ball_dy = bounce(brick[0], ball_x, ball_y, ball_dx, ball_dy)
+            if is_bounce:
                 bricks.remove(brick)
                 brick_break.play()
-                ball_dy *= -1
 
         draw_paddle(paddle_x)
         draw_ball(int(ball_x), int(ball_y))
@@ -243,24 +255,9 @@ def main_menu():
             ball_dy *= -1
 
         for button in buttons:
-            if button[0].colliderect(
-                    pygame.Rect(ball_x - BALL_RADIUS, ball_y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)):
+            is_bounce, ball_dx, ball_dy = bounce(button[0], ball_x, ball_y, ball_dx, ball_dy)
+            if is_bounce:
                 button = (button[0], random_color())
-                dx = ball_x - (button[0].x + button[0].width // 2)
-                dy = ball_y - (button[0].y + button[0].height // 2)
-
-                if abs(dx) > abs(dy):
-                    if dx > 0:
-                        ball_x = button[0].right + BALL_RADIUS
-                    else:
-                        ball_x = button[0].left - BALL_RADIUS
-                    ball_dx *= -1
-                else:
-                    if dy > 0:
-                        ball_y = button[0].bottom + BALL_RADIUS
-                    else:
-                        ball_y = button[0].top - BALL_RADIUS
-                        ball_dy *= -1
             pygame.draw.rect(screen, button[1], button[0])
 
         screen.blit(text_play,
