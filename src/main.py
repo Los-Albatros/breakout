@@ -3,7 +3,7 @@ import sys
 
 import pygame
 
-from src.options import load_pref, save_pref
+from options import load_pref, save_pref
 
 pygame.init()
 
@@ -175,7 +175,7 @@ def game():
             ball_y = SCREEN_HEIGHT // 2
             ball_dx, ball_dy = BALL_SPEED
             ball_dx *= random.choice([-1, 1])
-            if lives == 0 or not bricks:
+            if lives == 0 or len(bricks) == 0:
                 game_over = True
             else:
                 countdown = COUNTDOWN_TIME
@@ -200,8 +200,12 @@ def game():
             pygame.time.delay(1000)
             countdown -= 1
 
+        if len(bricks) == 0:
+            countdown = COUNTDOWN_TIME
+            game_over = True
+
     screen.fill(BLACK)
-    if not bricks:
+    if len(bricks) == 0:
         game_over_text = font_large.render("Game Win", True, GREEN)
         screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
     else:
