@@ -9,9 +9,11 @@ if not os.path.exists(pref_dir):
 
 pref_file = os.path.join(pref_dir, 'preferences.pickle')
 
+
 def save_pref(params):
     with open(pref_file, 'wb') as f:
         pickle.dump(params, f)
+
 
 def load_pref():
     try:
@@ -19,5 +21,3 @@ def load_pref():
             return pickle.load(f)
     except FileNotFoundError:
         return {}
-
-# parametres['controle'] = 'clavier'

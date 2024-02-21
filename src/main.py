@@ -3,6 +3,8 @@ import sys
 
 import pygame
 
+from src.options import load_pref, save_pref
+
 pygame.init()
 
 
@@ -48,8 +50,6 @@ font_small = pygame.font.Font(None, 36)
 
 brick_break = pygame.mixer.Sound("../resources/sounds/bottle_break.wav")
 brick_break.set_volume(0.1)
-
-mouse = True
 
 
 def draw_paddle(paddle):
@@ -118,6 +118,16 @@ def game():
     lives = LIVES
     game_over = False
 
+    switch_input = "Mouse"
+    volume = 0
+
+    params = load_pref()
+    if params:
+        volume = params['volume']
+        switch_input = params['input']
+
+    brick_break.set_volume(int(volume) / 200)
+
     while not game_over:
         screen.fill(BLACK)
 
@@ -129,7 +139,7 @@ def game():
                     main_menu()
 
         mouse_x, _ = pygame.mouse.get_pos()
-        if not mouse:
+        if switch_input == "Keyboard":
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT] and paddle.x > 0:
                 paddle.x -= PADDLE_SPEED
@@ -208,8 +218,38 @@ def quit_game():
 
 
 def options():
+    volume = 50
+    switch_input = "Keyboard"
+
+    params = load_pref()
+    if params:
+        volume = params['volume']
+        switch_input = params['input']
+
     while True:
         screen.fill(BLACK)
+        mx, my = pygame.mouse.get_pos()
+        text_options = font_large.render("Options", True, (255, 255, 255))
+        screen.blit(text_options, text_options.get_rect(center=(SCREEN_WIDTH // 4, 50)))
+
+        button_width = 200
+        button_height = 50
+        button_left = SCREEN_WIDTH // 2 - button_width // 2
+        button_top = 200
+        switch_rect = pygame.Rect(button_left, button_top, button_width, button_height)
+        switch_color = (0, 0, 155)
+        save_button = pygame.Rect(SCREEN_WIDTH // 2 - button_width - 25, button_top + 200, button_width, button_height)
+        save_color = (0, 155, 0)
+        cancel_button = pygame.Rect(SCREEN_WIDTH // 2 + 25, button_top + 200, button_width, button_height)
+        cancel_color = (155, 0, 0)
+
+        pygame.draw.rect(screen, WHITE, (button_left, button_top + 115, button_width, 10))
+        volume_rect = pygame.Rect(button_left + volume, 305, 10, 30)
+        volume_color = (0, 155, 0)
+
+        if pygame.mouse.get_pressed()[0] and button_left <= mx <= button_left + button_width and 280 <= my <= 350:
+            volume = pygame.mouse.get_pos()[0] - button_left
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game()
@@ -219,6 +259,46 @@ def options():
                     game()
                 if event.key == pygame.K_m:
                     main_menu()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if switch_rect.collidepoint(mx, my):
+                    if switch_input == "Keyboard":
+                        switch_input = "Mouse"
+                    else:
+                        switch_input = "Keyboard"
+                elif save_button.collidepoint(mx, my):
+                    params['volume'] = volume
+                    params['input'] = switch_input
+                    save_pref(params)
+                    main_menu()
+                elif cancel_button.collidepoint(mx, my):
+                    main_menu()
+        if switch_rect.collidepoint(mx, my):
+            switch_color = BLUE
+        elif save_button.collidepoint(mx, my):
+            save_color = GREEN
+        elif pygame.Rect(button_left, button_top + 110, button_width, 30).collidepoint(mx, my):
+            volume_color = GREEN
+        elif cancel_button.collidepoint(mx, my):
+            cancel_color = RED
+        pygame.draw.rect(screen, switch_color, switch_rect)
+        switch_text = font_small.render(switch_input, True, WHITE)
+        screen.blit(switch_text,
+                    switch_text.get_rect(center=(button_left + button_width // 2, 200 + button_height // 2)))
+        volume_text = font_small.render("Volume : ", True, WHITE)
+        screen.blit(volume_text, volume_text.get_rect(
+            center=(button_left + button_width // 2 - 50, 260 + button_height // 2)))
+        volume_text2 = font_small.render(str(volume // 2)+" %", True, volume_color)
+        screen.blit(volume_text2, volume_text2.get_rect(
+            center=(button_left + button_width - 30, 260 + button_height // 2)))
+        pygame.draw.rect(screen, save_color, save_button)
+        pygame.draw.rect(screen, volume_color, volume_rect)
+        save_text = font_small.render("Save", True, WHITE)
+        screen.blit(save_text, save_text.get_rect(
+            center=(SCREEN_WIDTH // 2 - button_width - 25 + button_width // 2, 400 + button_height // 2)))
+        pygame.draw.rect(screen, cancel_color, cancel_button)
+        cancel_text = font_small.render("Cancel", True, WHITE)
+        screen.blit(cancel_text,
+                    cancel_text.get_rect(center=(SCREEN_WIDTH // 2 + 25 + button_width // 2, 400 + button_height // 2)))
         pygame.display.update()
 
 
