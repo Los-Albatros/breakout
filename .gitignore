@@ -1,4 +1,4 @@
 build
 .idea/.name
-.idea/breakout.iml
+.idea/*.iml
 .idea/misc.xml
