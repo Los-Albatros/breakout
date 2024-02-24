@@ -1,4 +1,3 @@
 build
-.idea/.name
-.idea/*.iml
-.idea/misc.xml
+/.venv/
+/.idea/
