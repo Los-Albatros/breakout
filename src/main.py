@@ -40,8 +40,6 @@ NUM_COLS = 10
 
 COUNTDOWN_TIME = 3  # seconds
 
-LIVES = 5
-
 screen = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption("Breakout")
 
@@ -65,16 +63,15 @@ def draw_bricks(bricks):
         pygame.draw.rect(screen, brick[1], brick[0])
 
 
-def create_bricks():
-    bricks = []
-    for row in range(NUM_ROWS):
-        colors = [random_color() for _ in range(NUM_COLS)]
-        for col, color in enumerate(colors):
-            brick_x = col * (BRICK_WIDTH + BRICK_GAP)
-            brick_y = row * (BRICK_HEIGHT + BRICK_GAP)
-            brick_rect = pygame.Rect(brick_x, brick_y, BRICK_WIDTH, BRICK_HEIGHT)
-            bricks.append((brick_rect, color))
-    return bricks
+def load_map(filename):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        bricks = []
+        for line in lines:
+            x, y, r, g, b = map(int, line.strip().split(','))
+            brick_rect = pygame.Rect(x, y, BRICK_WIDTH, BRICK_HEIGHT)
+            bricks.append((brick_rect, (r, g, b)))
+        return bricks
 
 
 def draw_countdown(count):
@@ -106,16 +103,18 @@ def bounce(shape, ball_x, ball_y, ball_dx, ball_dy):
     return False, ball_dx, ball_dy
 
 
-def game():
+def game(level=1, lives=5):
     clock = pygame.time.Clock()
     paddle = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH) // 2, SCREEN_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT)
     ball_x, ball_y = GAME_WIDTH // 2, SCREEN_HEIGHT // 2
     ball_dx, ball_dy = BALL_SPEED
 
-    bricks = create_bricks()
+    if level == 2:
+        ball_x, ball_y = GAME_WIDTH // 2, 75
+
+    bricks = load_map("../resources/maps/" + str(level) + ".bo")
 
     countdown = COUNTDOWN_TIME
-    lives = LIVES
     game_over = False
 
     switch_input = "Mouse"
@@ -206,8 +205,12 @@ def game():
 
     screen.fill(BLACK)
     if len(bricks) == 0:
-        game_over_text = font_large.render("Game Win", True, GREEN)
-        screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
+        level = level + 1
+        if level < 3:
+            game(level, lives)
+        else:
+            game_over_text = font_large.render("Game Win", True, GREEN)
+            screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
     else:
         game_over_text = font_large.render("Game Over", True, RED)
         screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
@@ -260,7 +263,6 @@ def options():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     quit_game()
-                    game()
                 if event.key == pygame.K_m:
                     main_menu()
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -291,7 +293,7 @@ def options():
         volume_text = font_small.render("Volume : ", True, WHITE)
         screen.blit(volume_text, volume_text.get_rect(
             center=(button_left + button_width // 2 - 50, 260 + button_height // 2)))
-        volume_text2 = font_small.render(str(volume // 2)+" %", True, volume_color)
+        volume_text2 = font_small.render(str(volume // 2) + " %", True, volume_color)
         screen.blit(volume_text2, volume_text2.get_rect(
             center=(button_left + button_width - 30, 260 + button_height // 2)))
         pygame.draw.rect(screen, save_color, save_button)
@@ -322,6 +324,9 @@ def main_menu():
     buttons.append((button_play, (0, 0, 155)))
     buttons.append((button_options, (0, 155, 0)))
     buttons.append((button_exit, (155, 0, 0)))
+
+    level = 1
+    lives = 5
 
     while True:
         screen.fill(BLACK)
@@ -356,7 +361,7 @@ def main_menu():
                 quit_game()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button_play.collidepoint(mx, my):
-                    game()
+                    game(level, lives)
                 if button_options.collidepoint(mx, my):
                     options()
                 if button_exit.collidepoint(mx, my):
@@ -365,7 +370,7 @@ def main_menu():
                 if event.key == pygame.K_ESCAPE:
                     quit_game()
                 if event.key == pygame.K_g:
-                    game()
+                    game(level, lives)
                 if event.key == pygame.K_o:
                     options()
         pygame.display.update()
