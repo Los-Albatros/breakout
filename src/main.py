@@ -1,3 +1,4 @@
+import asyncio
 import random
 import sys
 
@@ -103,7 +104,7 @@ def bounce(shape, ball_x, ball_y, ball_dx, ball_dy):
     return False, ball_dx, ball_dy
 
 
-def game(level=1, lives=5):
+async def game(level=1, lives=5):
     clock = pygame.time.Clock()
     paddle = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH) // 2, SCREEN_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT)
     ball_x, ball_y = GAME_WIDTH // 2, SCREEN_HEIGHT // 2
@@ -132,10 +133,10 @@ def game(level=1, lives=5):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                quit_game()
+                await quit_game()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    main_menu()
+                    await main_menu()
 
         mouse_x, _ = pygame.mouse.get_pos()
         if switch_input == "Keyboard":
@@ -193,6 +194,7 @@ def game(level=1, lives=5):
         # refresh
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
 
         while countdown > 0:
             draw_countdown(countdown)
@@ -207,7 +209,7 @@ def game(level=1, lives=5):
     if len(bricks) == 0:
         level = level + 1
         if level < 3:
-            game(level, lives)
+            await game(level, lives)
         else:
             game_over_text = font_large.render("Game Win", True, GREEN)
             screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
@@ -216,15 +218,15 @@ def game(level=1, lives=5):
         screen.blit(game_over_text, (GAME_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
     pygame.display.flip()
     pygame.time.delay(2000)
-    main_menu()
+    await main_menu()
 
 
-def quit_game():
+async def quit_game():
     pygame.quit()
     sys.exit()
 
 
-def options():
+async def options():
     volume = 50
     switch_input = "Keyboard"
 
@@ -259,12 +261,12 @@ def options():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                quit_game()
+                await quit_game()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    quit_game()
+                    await quit_game()
                 if event.key == pygame.K_m:
-                    main_menu()
+                    await main_menu()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if switch_rect.collidepoint(mx, my):
                     if switch_input == "Keyboard":
@@ -274,10 +276,10 @@ def options():
                 elif save_button.collidepoint(mx, my):
                     params['volume'] = volume
                     params['input'] = switch_input
-                    save_pref(params)
-                    main_menu()
+                    await save_pref(params)
+                    await main_menu()
                 elif cancel_button.collidepoint(mx, my):
-                    main_menu()
+                    await main_menu()
         if switch_rect.collidepoint(mx, my):
             switch_color = BLUE
         elif save_button.collidepoint(mx, my):
@@ -308,8 +310,9 @@ def options():
         pygame.display.update()
 
 
-def main_menu():
+async def main_menu():
     clock = pygame.time.Clock()
+    await asyncio.sleep(0)
     ball_x = random.randint(10, GAME_WIDTH - 10)
     ball_y = random.randint(10, 100)
     ball_dx, ball_dy = BALL_SPEED
@@ -358,24 +361,25 @@ def main_menu():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                quit_game()
+                await quit_game()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button_play.collidepoint(mx, my):
-                    game(level, lives)
+                    await game(level, lives)
                 if button_options.collidepoint(mx, my):
-                    options()
+                    await options()
                 if button_exit.collidepoint(mx, my):
-                    quit_game()
+                    await quit_game()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    quit_game()
+                    await quit_game()
                 if event.key == pygame.K_g:
-                    game(level, lives)
+                    await game(level, lives)
                 if event.key == pygame.K_o:
-                    options()
+                    await options()
         pygame.display.update()
         clock.tick(60)
+        await asyncio.sleep(0)
 
 
 if __name__ == "__main__":
-    main_menu()
+    asyncio.run(main_menu())
